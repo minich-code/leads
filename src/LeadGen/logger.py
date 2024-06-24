@@ -3,6 +3,7 @@ import logging.config
 import os
 import sys
 from datetime import datetime
+from logging.handlers import RotatingFileHandler
 
 # Define the logfile name using the current date and time
 log_file_name = f"{datetime.now().strftime('%Y_%m_%d_%H_%M_%S')}.log"
@@ -32,10 +33,10 @@ LOGGING_CONFIG = {
     'handlers': {
         'file': {
             'level': 'DEBUG',  # Log all levels to the file
-            'class': 'logging.handlers.TimedRotatingFileHandler',
+            'class': 'logging.handlers.RotatingFileHandler',
             'filename': log_file_path,
-            'when': 'midnight',
-            'backupCount': 7,
+            'maxBytes': 10*1024*1024,  # 10 MB
+            'backupCount': 5,
             'formatter': 'detailed',
         },
         'console': {
@@ -46,7 +47,7 @@ LOGGING_CONFIG = {
         },
     },
     'loggers': {
-        'Leads': {
+        'LeadsGen': {
             'handlers': ['file', 'console'],
             'level': 'DEBUG',  # Set the minimum logging level to DEBUG
             'propagate': False
@@ -58,19 +59,5 @@ LOGGING_CONFIG = {
 logging.config.dictConfig(LOGGING_CONFIG)
 
 # Get the logger
-logger = logging.getLogger('Leads')
+logger = logging.getLogger('LeadsGen')
 
-# # Example usage of different logging levels
-# def example_function():
-#     logger.debug("This is a debug message for detailed diagnostic purposes.")
-#     logger.info("This is an info message to indicate a general event.")
-#     try:
-#         # Simulate an error
-#         1 / 0
-#     except ZeroDivisionError as e:
-#         logger.error("This is an error message to indicate an issue.", exc_info=True)
-
-# if __name__ == "__main__":
-#     logger.info("Starting the lead scoring process...")
-#     example_function()
-#     logger.info("Finished the lead scoring process.")
