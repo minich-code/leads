@@ -43,8 +43,6 @@ class ConfigurationManager:
             batch_size=config.get('batch_size', 3000)
         )
     
-
-
 # DataIngestion component class
 class DataIngestion:
     def __init__(self, config: DataIngestionConfig):
@@ -114,10 +112,15 @@ class DataIngestion:
 
 if __name__ == "__main__":
     try:
+        # creates an instance of ConfigurationManager to load the configuration settings.
         config = ConfigurationManager()
+        # gets the data ingestion configuration from the ConfigurationManager.
         data_ingestion_config = config.get_data_ingestion_config()
+        # creates an instance of DataIngestion with the data ingestion configuration.
         data_ingestion = DataIngestion(config=data_ingestion_config)
+        # calls the import_data_from_mongodb() method of the DataIngestion class to import the data from MongoDB.
         data_ingestion.import_data_from_mongodb()
+        # logs a message indicating that the data ingestion process completed successfully.
         logger.info("Data Ingestion from MongoDB Completed!")
     except CustomException as e:
         logger.error(f"Data ingestion process failed: {e}")

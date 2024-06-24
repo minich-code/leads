@@ -53,7 +53,7 @@ class DataIngestion:
 
             self._save_metadata(start_timestamp, start_time, total_records, output_path)
 
-        except pymongo.errors.ConnectionError as e:
+        except pymongo.errors.PyMongoError as e:
             logger.error(f"Error connecting to MongoDB: {e}")
             raise CustomException(f"Error connecting to MongoDB: {e}")
         except Exception as e:

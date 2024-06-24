@@ -1,1 +1,34 @@
-key: val
+COLUMNS:
+  Lead Origin: object 
+  Lead Source: object 
+  Do Not Email: object 
+  Do Not Call: object 
+  Converted: int64  
+  TotalVisits: float64
+  Total Time Spent on Website: float64
+  Page Views Per Visit: float64
+  Last Activity: object 
+  Country: object 
+  Specialization: object 
+  How did you hear about X Education: object 
+  What is your current occupation: object 
+  What matters most to you in choosing a course: object 
+  Search: object 
+  Newspaper Article: object 
+  X Education Forums: object 
+  Newspaper: object 
+  Digital Advertisement: object 
+  Through Recommendations: object 
+  Tags: object 
+  Lead Quality: object 
+  Lead Profile: object 
+  City: object 
+  Asymmetrique Activity Index: object 
+  Asymmetrique Profile Index: object 
+  Asymmetrique Activity Score: float64
+  Asymmetrique Profile Score: float64
+  A free copy of Mastering The Interview: object 
+  Last Notable Activity: object 
+
+TARGET_COLUMN:
+  name: Converted
