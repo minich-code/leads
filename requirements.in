@@ -1,0 +1,26 @@
+pandas
+scikit-learn
+numpy
+matplotlib
+flask
+python-box # config box
+pyYAML # Read YAML file
+ensure
+joblib
+types-PyYAML
+Flask-Cors
+joblib
+seaborn
+pymongo
+streamlit
+pip-chill
+category_encoders
+requests
+Flask-Mail
+
+# mlflow 
+mlflow
+dagshub
+dvc
+
+#-e .
