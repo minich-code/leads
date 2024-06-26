@@ -57,7 +57,7 @@ def create_directories(path_to_directories: list, verbose=True):
             logging.error(f"Error creating directory at: {path}, Error: {str(e)}")
             raise CustomException(f"Error creating directory at: {path}, Error: {str(e)}")
         
-@ensure_annotations
+
 def save_object(file_path: Path, obj: Any):
     """
     Saves a Python object to a file using joblib.
@@ -75,7 +75,7 @@ def save_object(file_path: Path, obj: Any):
         logging.error(f"Error saving object at: {file_path}, Error: {str(e)}")
         raise CustomException(f"Error saving object at: {file_path}, Error: {str(e)}")
 
-@ensure_annotations
+
 def load_object(file_path: Path) -> Any:
     """
     Loads a Python object from a file using joblib.

@@ -139,9 +139,13 @@ class DataValidation:
 
 if __name__ == "__main__":
     try:
+        # create instance of configuration manager lo load config settings 
         config = ConfigurationManager()
+        # get data validation config from config manager
         data_validation_config = config.get_data_validation_config()
+        # create instance of DataValidation with data validation config
         data_validation = DataValidation(config=data_validation_config)
+        # read data from csv file
         data = pd.read_csv(data_validation_config.data_dir)
         
         logger.info("Starting data validation process")
