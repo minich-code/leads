@@ -95,7 +95,7 @@ def load_object(file_path: Path) -> Any:
         logging.error(f"Error loading object from: {file_path}, Error: {str(e)}")
         raise CustomException(f"Error loading object from: {file_path}, Error: {str(e)}")
 
-@ensure_annotations
+
 def save_json(path: Path, data: dict):
     """
     Saves a dictionary to a JSON file.
@@ -112,7 +112,7 @@ def save_json(path: Path, data: dict):
         logging.error(f"Error saving JSON file at: {path}, Error: {str(e)}")
         raise CustomException(f"Error saving JSON file at: {path}, Error: {str(e)}")
 
-@ensure_annotations
+
 def load_json(path: Path) -> ConfigBox:
     """
     Loads a JSON file and returns its contents as a ConfigBox object.
@@ -132,7 +132,7 @@ def load_json(path: Path) -> ConfigBox:
         logging.error(f"Error loading JSON file from: {path}, Error: {str(e)}")
         raise CustomException(f"Error loading JSON file from: {path}, Error: {str(e)}")
 
-@ensure_annotations
+
 def save_bin(data: Any, path: Path):
     """
     Saves data to a binary file using joblib.
@@ -148,7 +148,7 @@ def save_bin(data: Any, path: Path):
         logging.error(f"Error saving binary file at: {path}, Error: {str(e)}")
         raise CustomException(f"Error saving binary file at: {path}, Error: {str(e)}")
 
-@ensure_annotations
+
 def load_bin(path: Path) -> Any:
     """
     Loads data from a binary file using joblib.
@@ -167,7 +167,7 @@ def load_bin(path: Path) -> Any:
         logging.error(f"Error loading binary file from: {path}, Error: {str(e)}")
         raise CustomException(f"Error loading binary file from: {path}, Error: {str(e)}")
 
-@ensure_annotations
+
 def get_size(path: Path) -> str:
     """
     Gets the size of the file at the given path in kilobytes.
