@@ -223,7 +223,7 @@ class ModelTrainer:
             }
            
             save_json(Path(self.config.val_metrics_path), training_metrics)
-                
+        
 
             logger.info(f"Model saved to {model_path}")
             logger.info("Neural Network Training process has completed")

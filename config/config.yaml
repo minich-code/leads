@@ -121,3 +121,17 @@ model_evaluation:
   confusion_matrix_report: artifacts/model_evaluation/confusion_matrix_rep.txt
   roc_auc_path: artifacts/model_evaluation/roc-auc.png
   pr_auc_path: artifacts/model_evaluation/pr-auc.png
+
+model_validation:
+  root_dir: artifacts/model_validation
+  test_feature_path: artifacts/data_transformation/X_test_tensor.pt
+  test_target_path: artifacts/data_transformation/y_test_tensor.pt
+  model_path: artifacts/model_trainer/{model_name}_epoch_{epochs}.pt
+  model_name: model
+  class_report: artifacts/model_validation/classification-report.png
+  classification_report_path: artifacts/model_validation/classification_rep.txt
+  conf_matrix: artifacts/model_validation/confusion-matrix.png
+  roc_auc_path: artifacts/model_validation/roc-auc.png
+  pr_auc_path: artifacts/model_validation/pr-auc.png
+  val_metric_file_name: artifacts/model_validation/metrics.json
+
