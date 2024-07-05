@@ -10,7 +10,7 @@ from torch.utils.data import TensorDataset
 from src.LeadGen.logger import logger
 from src.LeadGen.exception import CustomException
 from src.LeadGen.utils.commons import save_object, read_yaml, create_directories
-from src.LeadGen.constants import CONFIG_FILE_PATH, PARAMS_FILE_PATH, SCHEMA_FILE_PATH
+from src.LeadGen.constants import *
 
 from sklearn.model_selection import train_test_split
 from sklearn.compose import ColumnTransformer
@@ -28,19 +28,16 @@ class DataTransformationConfig:
 
 
 class ConfigurationManager:
-    def __init__(
-        self,
-        config_filepath=CONFIG_FILE_PATH,
-        params_filepath=PARAMS_FILE_PATH,
-        schema_filepath=SCHEMA_FILE_PATH):
+    def __init__(self, config_filepath=DATA_TRANSFORMATION_FILEPATH):
 
         self.config = read_yaml(config_filepath)
-        self.params = read_yaml(params_filepath)
-        self.schema = read_yaml(schema_filepath)
+
         create_directories([self.config.artifacts_root])
 
     def get_data_transformation_config(self) -> DataTransformationConfig:
+        
         config = self.config.data_transformation
+        
         create_directories([config.root_dir])
 
         return DataTransformationConfig(

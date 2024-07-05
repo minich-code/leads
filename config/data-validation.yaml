@@ -1,0 +1,56 @@
+artifacts_root: artifacts
+
+data_validation:
+  root_dir: artifacts/data_validation
+  data_dir: artifacts/data_ingestion/lead.csv
+  STATUS_FILE: artifacts/data_validation/status.json 
+  critical_columns:
+    - "Lead Origin" 
+    - "Lead Source"
+    - "Do Not Email"
+    - "Do Not Call"
+    - "Converted"  
+    - "TotalVisits"
+    - "Total Time Spent on Website"
+    - "Page Views Per Visit"
+    - "Last Activity" 
+    - "Country" 
+    - "Specialization" 
+    - "How did you hear about X Education" 
+    - "What is your current occupation" 
+    - "What matters most to you in choosing a course" 
+    - "Search" 
+    - "Newspaper Article" 
+    - "X Education Forums" 
+    - "Newspaper" 
+    - "Digital Advertisement" 
+    - "Through Recommendations" 
+    - "Tags" 
+    - "Lead Quality" 
+    - "Lead Profile" 
+    - "City" 
+    - "Asymmetrique Activity Index" 
+    - "Asymmetrique Profile Index" 
+    - "Asymmetrique Activity Score"
+    - "Asymmetrique Profile Score"
+    - "A free copy of Mastering The Interview" 
+    - "Last Notable Activity" 
+  data_ranges:
+    Converted:
+      min: 0
+      max: 1
+    TotalVisits:
+      min: 0
+      max: 300
+    Total Time Spent on Website:
+      min: 0 
+      max: 2500 
+    Page Views Per Visit:
+      min: 0
+      max: 75
+    Asymmetrique Activity Score:
+      min: 0
+      max: 100
+    Asymmetrique Profile Score:
+      min: 0
+      max: 100

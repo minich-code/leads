@@ -1,0 +1,4 @@
+prediction_pipeline:
+  model_path: artifacts/model_trainer/{model_name}_epoch_{epochs}.pt
+  model_name: model
+  preprocessor_path: artifacts/data_transformation/preprocessor_obj.joblib

@@ -1,0 +1,11 @@
+artifacts_root: artifacts
+
+model_trainer:
+  root_dir: artifacts/model_trainer
+  train_features_path: artifacts/data_transformation/X_train_tensor.pt
+  train_targets_path: artifacts/data_transformation/y_train_tensor.pt
+  val_features_path: artifacts/data_transformation/X_val_tensor.pt
+  val_targets_path: artifacts/data_transformation/y_val_tensor.pt
+  val_metrics_path: artifacts/model_trainer/model-val-metric.json
+  model_name: model
+

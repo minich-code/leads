@@ -1,9 +1,5 @@
 from pathlib import Path
 from dataclasses import dataclass
-from src.LeadGen.constants import *
-from src.LeadGen.utils.commons import read_yaml, create_directories, save_json
-from src.LeadGen.logger import logger
-from src.LeadGen.exception import CustomException
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -22,8 +18,15 @@ from sklearn.metrics import (
     auc,
     precision_recall_curve,
 )
-import numpy as np  # Import numpy for array operations
-import json  # Import json for loading training metrics
+import numpy as np
+import os
+import json
+
+from src.LeadGen.constants import *
+from src.LeadGen.utils.commons import read_yaml, create_directories, save_json
+from src.LeadGen.logger import logger
+from src.LeadGen.exception import CustomException
+
 
 @dataclass(frozen=True)
 class ModelEvaluationConfig:
@@ -51,36 +54,35 @@ class ModelEvaluationConfig:
 
 
 class ConfigurationManager:
-    def __init__(
-        self,
-        config_filepath=CONFIG_FILE_PATH,
-        params_filepath=PARAMS_FILE_PATH,
-        schema_filepath=SCHEMA_FILE_PATH,
-    ):
+    def __init__(self, config_filepath=MODEL_EVALUATION_CONFIG_FILEPATH, params_filepath=PARAMS_CONFIG_FILEPATH):
+
         self.config = read_yaml(config_filepath)
+
         self.params = read_yaml(params_filepath)
-        self.schema = read_yaml(schema_filepath)
+
         create_directories([self.config.artifacts_root])
 
     def get_model_evaluation_config(self) -> ModelEvaluationConfig:
+
         config = self.config.model_evaluation
+
         params = self.params.dnn_params
 
         create_directories([config.root_dir])
-
+        
         return ModelEvaluationConfig(
             root_dir=config.root_dir,
-            val_features_path=Path(config.val_features_path),  # Ensure Path objects
-            val_target_path=Path(config.val_target_path),  # Ensure Path objects
-            model_path=Path(config.model_path.format(model_name=config.model_name, epochs=params["epochs"])),  # Ensure Path objects
-            metric_file_name=Path(config.metric_file_name),  # Ensure Path objects
+            val_features_path=Path(config.val_features_path),  
+            val_target_path=Path(config.val_target_path),
+            model_path=Path(config.model_path.format(model_name=config.model_name, epochs=params["epochs"])),  
+            metric_file_name=Path(config.metric_file_name),  
             validation_metrics_path=Path(config.validation_metrics_path),
             training_metrics_path=Path(config.training_metrics_path),
-            report_path=Path(config.report_path),  # New path for classification report
-            confusion_matrix_path=Path(config.confusion_matrix_path),  # New path for confusion matrix
-            confusion_matrix_report=Path(config.confusion_matrix_report),  # New path for confusion matrix report
-            roc_auc_path=Path(config.roc_auc_path),  # New path for ROC-AUC chart
-            pr_auc_path=Path(config.pr_auc_path),  # New path for PR-AUC chart
+            report_path=Path(config.report_path),  
+            confusion_matrix_path=Path(config.confusion_matrix_path),  
+            confusion_matrix_report=Path(config.confusion_matrix_report), 
+            roc_auc_path=Path(config.roc_auc_path),  
+            pr_auc_path=Path(config.pr_auc_path),  
             batch_size=params["batch_size"],
             learning_rate=params["learning_rate"],
             epochs=params["epochs"],
@@ -89,6 +91,7 @@ class ConfigurationManager:
             loss_function=params["loss_function"],
             activation_function=params["activation_function"],
         )
+
 
 
 class SimpleNN(nn.Module):
@@ -133,63 +136,57 @@ class ModelEvaluation:
         input_dim = next(iter(val_loader))[0].shape[1]
         model = self.load_model(input_dim)
         
-        criterion = nn.BCELoss()
+        all_labels, all_predictions = self._evaluate_model(model, val_loader)
+        self._save_metrics(all_labels, all_predictions)
+        self._plot_metrics(all_labels, all_predictions)
 
+    def _evaluate_model(self, model, val_loader):
         all_labels = []
         all_predictions = []
-        
         with torch.no_grad():
             for inputs, labels in val_loader:
                 outputs = model(inputs).squeeze()
-                
                 all_labels.extend(labels.cpu().numpy())
                 all_predictions.extend(outputs.cpu().numpy())
-        
+        return all_labels, all_predictions
+    
+    def _save_metrics(self, all_labels, all_predictions):
         precision, recall, _ = precision_recall_curve(all_labels, all_predictions)
-        
-        # Ensure recall is sorted in increasing order
         sorted_indices = np.argsort(recall)
         recall_sorted = np.array(recall)[sorted_indices]
         precision_sorted = np.array(precision)[sorted_indices]
-        
         roc_pr_metrics = {
             "roc_auc": roc_auc_score(all_labels, all_predictions),
             "pr_auc": auc(recall_sorted, precision_sorted)
         }
+        save_json(str(self.config.metric_file_name), roc_pr_metrics)
 
-        save_json(str(self.config.metric_file_name), roc_pr_metrics)  # Convert Path to str here
 
- 
-        self.plot_metrics(all_labels, all_predictions)
+    def _plot_metrics(self, all_labels, all_predictions):
+        self._plot_classification_report(all_labels, all_predictions)
+        self._plot_confusion_matrix(all_labels, all_predictions)
+        self._plot_roc_curve(all_labels, all_predictions)
+        self._plot_pr_curve(all_labels, all_predictions)
 
-    def plot_metrics(self, all_labels, all_predictions):
-        
-        print("Classification Report:\n", classification_report(all_labels, (np.array(all_predictions) > 0.5).astype(int)))
-        
-        # Classification Report
+    def _plot_classification_report(self, all_labels, all_predictions):
         classification_rep = classification_report(all_labels, (np.array(all_predictions) > 0.5).astype(int))
         with open(self.config.report_path, "w") as f:
             f.write(classification_rep)
         print("Classification Report:\n", classification_rep)
 
-        # Confusion Matrix
+    def _plot_confusion_matrix(self, all_labels, all_predictions):
         cm = confusion_matrix(all_labels, (np.array(all_predictions) > 0.5).astype(int))
         with open(self.config.confusion_matrix_report, "w") as f:
             f.write(str(cm))
-                        
-
-        cm = confusion_matrix(all_labels, (np.array(all_predictions) > 0.5).astype(int))
         plt.figure(figsize=(10, 7))
         sns.heatmap(cm, annot=True, fmt='d', cmap='Blues')
         plt.xlabel('Predicted')
         plt.ylabel('Actual')
         plt.title('Confusion Matrix')
-        plt.savefig(self.config.confusion_matrix_path)  # Save the figure
+        plt.savefig(os.path.join(self.config.root_dir, "confusion_matrix.png"))
         plt.show()
 
-        print(confusion_matrix(all_labels, (np.array(all_predictions) > 0.5).astype(int)))
-
-        # ROC-AUC
+    def _plot_roc_curve(self, all_labels, all_predictions):
         roc_auc = roc_auc_score(all_labels, all_predictions)
         fpr, tpr, _ = roc_curve(all_labels, all_predictions)
         plt.figure()
@@ -199,10 +196,10 @@ class ModelEvaluation:
         plt.ylabel('True Positive Rate')
         plt.title('ROC Curve')
         plt.legend()
-        plt.savefig(self.config.roc_auc_path)  # Save the figure
+        plt.savefig(os.path.join(self.config.root_dir, "roc_auc.png"))
         plt.show()
 
-        # PR-AUC
+    def _plot_pr_curve(self, all_labels, all_predictions):
         precision, recall, _ = precision_recall_curve(all_labels, all_predictions)
         pr_auc = auc(recall, precision)
         plt.figure()
@@ -211,8 +208,9 @@ class ModelEvaluation:
         plt.ylabel('Precision')
         plt.title('Precision-Recall Curve')
         plt.legend()
-        plt.savefig(self.config.pr_auc_path)  # Save the figure
+        plt.savefig(os.path.join(self.config.root_dir, "pr_auc.png"))
         plt.show()
+    
 
 
 if __name__ == "__main__":

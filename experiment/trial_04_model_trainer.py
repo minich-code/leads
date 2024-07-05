@@ -11,8 +11,8 @@ from torch.utils.data import DataLoader, TensorDataset
 from src.LeadGen.logger import logger  # Replace with your custom logger
 from src.LeadGen.exception import CustomException
 from src.LeadGen.utils.commons import save_json, read_yaml, create_directories
-from src.LeadGen.constants import CONFIG_FILE_PATH, PARAMS_FILE_PATH, SCHEMA_FILE_PATH
-from experiment.trial_03_data_transformation import DataTransformationConfig, DataTransformation
+from src.LeadGen.constants import *
+
 
 
 @dataclass(frozen=True)
@@ -35,27 +35,12 @@ class ModelTrainerConfig:
     activation_function: str
    
 class ConfigurationManager:
-    def __init__(
-        self,
-        config_filepath=CONFIG_FILE_PATH,
-        params_filepath=PARAMS_FILE_PATH,
-        schema_filepath=SCHEMA_FILE_PATH):
+    def __init__(self, config_filepath=MODEL_TRAINER_CONFIG_FILEPATH, params_filepath=PARAMS_CONFIG_FILEPATH):
 
         self.config = read_yaml(config_filepath)
         self.params = read_yaml(params_filepath)
-        self.schema = read_yaml(schema_filepath)
         create_directories([self.config.artifacts_root])
 
-    def get_data_transformation_config(self) -> DataTransformationConfig:
-        config = self.config.data_transformation
-        create_directories([config.root_dir])
-
-        return DataTransformationConfig(
-            root_dir=Path(config.root_dir),
-            data_path=Path(config.data_path),
-            numerical_cols=list(config.numerical_cols),
-            categorical_cols=list(config.categorical_cols)
-        )
     
     def get_model_trainer_config(self) -> ModelTrainerConfig:
         config = self.config.model_trainer
@@ -170,8 +155,6 @@ class ModelTrainer:
                 training_losses.append(train_loss)
                 training_accuracies.append(train_accuracy)
 
-                #logger.info(f"Epoch {epoch+1}, Train Loss: {train_loss:.4f}, Train Acc: {train_accuracy:.4f}")
-                #print(f"Epoch {epoch+1}, Train Loss: {train_loss:.4f}, Train Acc: {train_accuracy:.4f}")
 
                 # Validation phase
                 model.eval()
@@ -198,8 +181,6 @@ class ModelTrainer:
                 validation_losses.append(val_loss)
                 validation_accuracies.append(val_accuracy)
 
-                #logger.info(f"Epoch {epoch+1}, Validation Loss: {val_loss:.4f}, Validation Acc: {val_accuracy:.4f}")
-                #print(f"Epoch {epoch+1}, Validation Loss: {val_loss:.4f}, Validation Acc: {val_accuracy:.4f}")
 
                 # Print both validation loss and accuracy for training and validation 
                 logger.info(f"Epoch {epoch+1}, Validation Loss: {val_loss:.4f}, Validation Acc: {val_accuracy:.4f}, Training Loss: {train_loss:.4f}, Training Acc: {train_accuracy:.4f}")

@@ -1,11 +1,11 @@
 dnn_params:
   batch_size: 32
   learning_rate: 0.001
-  epochs: 100
+  epochs: 70
   dropout_rates:
     layer_1: 0.1
     layer_2: 0.0
-    layer_3: 0.1
+    layer_3: 0.0
   optimizer: Adam
   loss_function: BCELoss
   activation_function: relu

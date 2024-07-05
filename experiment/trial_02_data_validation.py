@@ -1,10 +1,9 @@
 from dataclasses import dataclass
 from pathlib import Path
-import os
 import json
 import pandas as pd
 
-from src.LeadGen.constants import CONFIG_FILE_PATH, PARAMS_FILE_PATH, SCHEMA_FILE_PATH
+from src.LeadGen.constants import *
 from src.LeadGen.utils.commons import read_yaml, create_directories
 from src.LeadGen.logger import logger
 
@@ -18,15 +17,10 @@ class DataValidationConfig:
     data_ranges: dict
 
 class ConfigurationManager:
-    def __init__(
-        self,
-        config_filepath=CONFIG_FILE_PATH,
-        params_filepath=PARAMS_FILE_PATH,
-        schema_filepath=SCHEMA_FILE_PATH):
+    def __init__(self, config_filepath=DATA_VALIDATION_FILEPATH, schema_filepath=SCHEMA_FILE_PATH):
         
         logger.info("Initializing ConfigurationManager")
         self.config = read_yaml(config_filepath)
-        self.params = read_yaml(params_filepath)
         self.schema = read_yaml(schema_filepath)
         create_directories([self.config.artifacts_root])
 

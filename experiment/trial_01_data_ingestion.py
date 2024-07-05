@@ -8,9 +8,9 @@ import json
 import time
 from datetime import datetime
 from src.LeadGen.utils.commons import read_yaml, create_directories
-from src.LeadGen.constants import CONFIG_FILE_PATH, PARAMS_FILE_PATH, SCHEMA_FILE_PATH
+from src.LeadGen.constants import DATA_INGESTION_FILEPATH
 from src.LeadGen.exception import CustomException
-from src.LeadGen.logger import logger  # Import the custom logger
+from src.LeadGen.logger import logger  
 
 # Data class for data ingestion configuration
 @dataclass
@@ -23,10 +23,9 @@ class DataIngestionConfig:
 
 # ConfigurationManager class to manage configurations
 class ConfigurationManager:
-    def __init__(self, config_filepath=CONFIG_FILE_PATH, params_filepath=PARAMS_FILE_PATH, schema_filepath=SCHEMA_FILE_PATH):
+    def __init__(self, config_filepath=DATA_INGESTION_FILEPATH): 
         self.config = read_yaml(config_filepath)
-        self.params = read_yaml(params_filepath)
-        self.schema = read_yaml(schema_filepath)
+
         create_directories([self.config.artifacts_root])
 
     def get_data_ingestion_config(self) -> DataIngestionConfig:

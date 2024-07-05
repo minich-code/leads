@@ -1,0 +1,19 @@
+artifacts_root: artifacts
+
+model_evaluation:
+  root_dir: artifacts/model_evaluation
+  val_features_path: artifacts/data_transformation/X_val_tensor.pt
+  val_target_path: artifacts/data_transformation/y_val_tensor.pt
+  model_path: artifacts/model_trainer/{model_name}_epoch_{epochs}.pt
+  metric_file_name: artifacts/model_evaluation/metrics.json
+  validation_metrics_path: artifacts/model_evaluation/val_metrics.txt
+  model_name: model
+  training_metrics_path: artifacts/model_trainer/training_metrics.json
+  report_path: artifacts/model_evaluation/classification_rep.txt
+  #confusion_matrix_path: artifacts/model_evaluation/confusion_matrix.png
+  confusion_matrix_report: artifacts/model_evaluation/confusion_matrix_rep.txt
+  # roc_auc_path: artifacts/model_evaluation/roc-auc.png
+  # pr_auc_path: artifacts/model_evaluation/pr-auc.png
+
+
+
