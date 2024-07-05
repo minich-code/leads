@@ -15,13 +15,13 @@ except Exception as e:
     raise e
 
 
-COMPONENT_02_NAME = "DATA VALIDATION COMPONENT"
-try:
-    logger.info(f"# ====================== {COMPONENT_02_NAME} Started! ================================= #")
-    data_validation_pipeline = DataValidationPipeline()
-    data_validation_pipeline.run()
-    logger.info(f"## ======================== {COMPONENT_02_NAME} Terminated Successfully!=============== ##\n\nx************************x")
+# COMPONENT_02_NAME = "DATA VALIDATION COMPONENT"
+# try:
+#     logger.info(f"# ====================== {COMPONENT_02_NAME} Started! ================================= #")
+#     data_validation_pipeline = DataValidationPipeline()
+#     data_validation_pipeline.run()
+#     logger.info(f"## ======================== {COMPONENT_02_NAME} Terminated Successfully!=============== ##\n\nx************************x")
 
-except Exception as e:
-    logger.exception(e)
-    raise e
+# except Exception as e:
+#     logger.exception(e)
+#     raise e

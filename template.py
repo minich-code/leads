@@ -34,8 +34,8 @@ list_of_files = [
     f"src/{package_name}/constants/__init__.py",
     f"src/{package_name}/exception.py",
     f"src/{package_name}/logger.py",
+    
     "config/config.yaml",
-    "metrics_threshold.yaml",
     "params.yaml",
     "schema.yaml",
     "main.py",

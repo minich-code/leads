@@ -12,8 +12,8 @@ class DataIngestionPipeline:
 
     def run(self):
         try:
-            config = ConfigurationManager()
-            data_ingestion_config = config.get_data_ingestion_config()
+            config_manager = ConfigurationManager()
+            data_ingestion_config = config_manager.get_data_ingestion_config()
             data_ingestion = DataIngestion(config=data_ingestion_config)
             data_ingestion.import_data_from_mongodb()
             logger.info("Data Ingestion from MongoDB Completed!")

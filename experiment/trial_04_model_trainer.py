@@ -8,7 +8,7 @@ import torch.nn as nn
 import torch.optim as optim
 import torch.nn.functional as F
 from torch.utils.data import DataLoader, TensorDataset
-from src.LeadGen.logger import logger  # Replace with your custom logger
+from src.LeadGen.logger import logger  
 from src.LeadGen.exception import CustomException
 from src.LeadGen.utils.commons import save_json, read_yaml, create_directories
 from src.LeadGen.constants import *
@@ -238,7 +238,7 @@ class ModelTrainer:
         plt.legend()
 
         plt.show()
-        #plt.savefig(os.path.join(self.config.root_dir, "training_metrics.png"))
+        plt.savefig(os.path.join(self.config.root_dir, "training_loss_curves.png"))
    
 if __name__ == '__main__':
     try:
