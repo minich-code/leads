@@ -1,0 +1,36 @@
+stages: 
+  data_ingestion:
+    cmd: python src\LeadGen\pipelines\pip_01_data_ingestion.py
+    deps: 
+      - src\LeadGen\pipelines\pip_01_data_ingestion.py
+      - config\data-ingestion.yaml
+
+    outs: 
+      - artifacts\data_ingestion\lead.csv
+      - artifacts\data_ingestion\data-ingestion-metadata.json
+
+  data_validation: 
+    cmd: python src\LeadGen\pipelines\pip_02_data_validation.py
+    deps: 
+      - src\LeadGen\pipelines\pip_02_data_validation.py
+      - config\data-validation.yaml
+
+    outs: 
+      - artifacts\data_validation\status.json
+
+  data_transformation: 
+    cmd: python src\LeadGen\components\c_03_data_transformation.py
+    deps: 
+      - src\LeadGen\components\c_03_data_transformation.py
+      - config\data-transformation.yaml
+
+    outs: 
+      - artifacts\data_transformation\preprocessor_obj.joblib
+      - artifacts\data_transformation\X_test_tensor.pt
+      - artifacts\data_transformation\X_train_tensor.pt
+      - artifacts\data_transformation\X_val_tensor.pt
+      - artifacts\data_transformation\y_test_tensor.pt
+      - artifacts\data_transformation\y_train_tensor.pt
+      - artifacts\data_transformation\y_val_tensor.pt
+
+
