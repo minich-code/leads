@@ -3,7 +3,7 @@ from src.LeadGen.utils.commons import read_yaml, create_directories
 from src.LeadGen.constants import *
 
 from src.LeadGen.entity.config_entity import (DataIngestionConfig, DataValidationConfig, 
-                                              DataTransformationConfig, ModelTrainerConfig)
+                                              DataTransformationConfig, ModelTrainerConfig, ModelEvaluationConfig)
 from src.LeadGen.logger import logger      
 
 class ConfigurationManager:
@@ -14,7 +14,8 @@ class ConfigurationManager:
         data_preprocessing_config=DATA_TRANSFORMATION_FILEPATH, 
         schema_config=SCHEMA_CONFIG_FILEPATH,
         model_training_config=MODEL_TRAINER_CONFIG_FILEPATH,
-        params_config=PARAMS_CONFIG_FILEPATH
+        params_config=PARAMS_CONFIG_FILEPATH,
+        model_evaluation_config=MODEL_EVALUATION_CONFIG_FILEPATH
         
         ): 
 
@@ -25,12 +26,14 @@ class ConfigurationManager:
         self.schema = read_yaml(schema_config)
         self.training_config = read_yaml(model_training_config)
         self.params = read_yaml(params_config)
+        self.evaluation_config = read_yaml(model_evaluation_config)
         
         
         create_directories([self.config.artifacts_root])
         create_directories([self.data_val_config.artifacts_root])
         create_directories([self.preprocessing_config.artifacts_root])
         create_directories([self.training_config.artifacts_root])
+        create_directories([self.evaluation_config.artifacts_root])
 
 
     def get_data_ingestion_config(self) -> DataIngestionConfig:
@@ -94,5 +97,30 @@ class ConfigurationManager:
             optimizer=params['optimizer'],
             loss_function=params['loss_function'],
             activation_function=params['activation_function'],
+        )
+    
+# Model evaluation 
+    def get_model_evaluation_config(self) -> ModelEvaluationConfig:
+        eval_config = self.evaluation_config.model_evaluation
+        params = self.params.dnn_params
+        create_directories([eval_config.root_dir])
+        
+        return ModelEvaluationConfig(
+            root_dir=eval_config.root_dir,
+            val_features_path=Path(eval_config.val_features_path),
+            val_target_path=Path(eval_config.val_target_path),
+            model_path=Path(eval_config.model_path.format(model_name=eval_config.model_name, epochs=params["epochs"])),
+            metric_file_name=Path(eval_config.metric_file_name),
+            validation_metrics_path=Path(eval_config.validation_metrics_path),
+            training_metrics_path=Path(eval_config.training_metrics_path),
+            report_path=Path(eval_config.report_path),
+            confusion_matrix_report=Path(eval_config.confusion_matrix_report),
+            batch_size=params["batch_size"],
+            learning_rate=params["learning_rate"],
+            epochs=params["epochs"],
+            dropout_rates=params["dropout_rates"],
+            optimizer=params["optimizer"],
+            loss_function=params["loss_function"],
+            activation_function=params["activation_function"]
         )
     

@@ -37,7 +37,7 @@ class ModelTrainerConfig:
     batch_size: int
     learning_rate: float
     epochs: int
-    dropout_rates: dict  # Updated to dict for dropout rates per layer
+    dropout_rates: dict  
     optimizer: str
     loss_function: str
     activation_function: str

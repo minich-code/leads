@@ -49,3 +49,24 @@ class ModelTrainerConfig:
     loss_function: str
     activation_function: str
 
+# Model evaluation 
+@dataclass()
+class ModelEvaluationConfig:
+    root_dir: Path
+    val_features_path: Path
+    val_target_path: Path
+    model_path: Path
+    metric_file_name: Path
+    validation_metrics_path: Path
+    training_metrics_path: Path
+    report_path: Path
+    confusion_matrix_report: Path
+    # Model parameters
+    batch_size: int
+    learning_rate: float
+    epochs: int
+    dropout_rates: dict
+    optimizer: str
+    loss_function: str
+    activation_function: str
+

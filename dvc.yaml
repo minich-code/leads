@@ -50,6 +50,23 @@ stages:
       - artifacts\model_trainer\model-val-metric.json
       - artifacts\model_trainer\training_validation_metrics.png
 
+  model_evaluation:
+    cmd: python src\LeadGen\pipelines\pip_05_model_evaluation.py
+    deps: 
+      - src\LeadGen\pipelines\pip_05_model_evaluation.py
+      - config\model-evaluation.yaml
+      - params.yaml
+
+    
+    outs:
+      - artifacts\model_evaluation\classification_rep.png
+      - artifacts\model_evaluation\classification_rep.txt
+      - artifacts\model_evaluation\confusion_matrix_rep.txt
+      - artifacts\model_evaluation\confusion_matrix.png
+      - artifacts\model_evaluation\metrics.json
+      - artifacts\model_evaluation\pr_auc.png
+      - artifacts\model_evaluation\roc_auc.png
+
 
 
 

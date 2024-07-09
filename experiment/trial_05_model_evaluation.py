@@ -1,3 +1,6 @@
+
+
+
 from pathlib import Path
 from dataclasses import dataclass
 import torch
@@ -21,11 +24,24 @@ from sklearn.metrics import (
 import numpy as np
 import os
 import json
+import logging
+import pandas as pd
 
 from src.LeadGen.constants import *
 from src.LeadGen.utils.commons import read_yaml, create_directories, save_json
 from src.LeadGen.logger import logger
 from src.LeadGen.exception import CustomException
+
+import mlflow
+import mlflow.pytorch
+
+# Enable debug logging for MLflow
+logging.getLogger("mlflow").setLevel(logging.DEBUG)
+
+# Initialize MLflow
+mlflow.set_tracking_uri("https://dagshub.com/minich-code/leads.mlflow")
+os.environ['MLFLOW_TRACKING_USERNAME'] = 'minich-code'
+os.environ['MLFLOW_TRACKING_PASSWORD'] = 'cadc5e14617d7fae5ed8a6532906afca14f3b0f9'
 
 
 @dataclass(frozen=True)
@@ -38,10 +54,7 @@ class ModelEvaluationConfig:
     validation_metrics_path: Path
     training_metrics_path: Path
     report_path: Path
-    confusion_matrix_path: Path
     confusion_matrix_report: Path
-    roc_auc_path: Path
-    pr_auc_path: Path
 
     # Model parameters
     batch_size: int
@@ -54,44 +67,34 @@ class ModelEvaluationConfig:
 
 
 class ConfigurationManager:
-    def __init__(self, config_filepath=MODEL_EVALUATION_CONFIG_FILEPATH, params_filepath=PARAMS_CONFIG_FILEPATH):
-
-        self.config = read_yaml(config_filepath)
-
-        self.params = read_yaml(params_filepath)
-
-        create_directories([self.config.artifacts_root])
+    def __init__(self, model_evaluation_config=MODEL_EVALUATION_CONFIG_FILEPATH, params_config=PARAMS_CONFIG_FILEPATH):
+        self.evaluation_config = read_yaml(model_evaluation_config)
+        self.params = read_yaml(params_config)
+        create_directories([self.evaluation_config.artifacts_root])
 
     def get_model_evaluation_config(self) -> ModelEvaluationConfig:
-
-        config = self.config.model_evaluation
-
+        eval_config = self.evaluation_config.model_evaluation
         params = self.params.dnn_params
-
-        create_directories([config.root_dir])
+        create_directories([eval_config.root_dir])
         
         return ModelEvaluationConfig(
-            root_dir=config.root_dir,
-            val_features_path=Path(config.val_features_path),  
-            val_target_path=Path(config.val_target_path),
-            model_path=Path(config.model_path.format(model_name=config.model_name, epochs=params["epochs"])),  
-            metric_file_name=Path(config.metric_file_name),  
-            validation_metrics_path=Path(config.validation_metrics_path),
-            training_metrics_path=Path(config.training_metrics_path),
-            report_path=Path(config.report_path),  
-            confusion_matrix_path=Path(config.confusion_matrix_path),  
-            confusion_matrix_report=Path(config.confusion_matrix_report), 
-            roc_auc_path=Path(config.roc_auc_path),  
-            pr_auc_path=Path(config.pr_auc_path),  
+            root_dir=eval_config.root_dir,
+            val_features_path=Path(eval_config.val_features_path),
+            val_target_path=Path(eval_config.val_target_path),
+            model_path=Path(eval_config.model_path.format(model_name=eval_config.model_name, epochs=params["epochs"])),
+            metric_file_name=Path(eval_config.metric_file_name),
+            validation_metrics_path=Path(eval_config.validation_metrics_path),
+            training_metrics_path=Path(eval_config.training_metrics_path),
+            report_path=Path(eval_config.report_path),
+            confusion_matrix_report=Path(eval_config.confusion_matrix_report),
             batch_size=params["batch_size"],
             learning_rate=params["learning_rate"],
             epochs=params["epochs"],
             dropout_rates=params["dropout_rates"],
             optimizer=params["optimizer"],
             loss_function=params["loss_function"],
-            activation_function=params["activation_function"],
+            activation_function=params["activation_function"]
         )
-
 
 
 class SimpleNN(nn.Module):
@@ -139,6 +142,7 @@ class ModelEvaluation:
         all_labels, all_predictions = self._evaluate_model(model, val_loader)
         self._save_metrics(all_labels, all_predictions)
         self._plot_metrics(all_labels, all_predictions)
+        self._log_to_mlflow(all_labels, all_predictions, model)
 
     def _evaluate_model(self, model, val_loader):
         all_labels = []
@@ -161,7 +165,6 @@ class ModelEvaluation:
         }
         save_json(str(self.config.metric_file_name), roc_pr_metrics)
 
-
     def _plot_metrics(self, all_labels, all_predictions):
         self._plot_classification_report(all_labels, all_predictions)
         self._plot_confusion_matrix(all_labels, all_predictions)
@@ -170,9 +173,30 @@ class ModelEvaluation:
 
     def _plot_classification_report(self, all_labels, all_predictions):
         classification_rep = classification_report(all_labels, (np.array(all_predictions) > 0.5).astype(int))
+        # Save classification report as a txt file
         with open(self.config.report_path, "w") as f:
             f.write(classification_rep)
         print("Classification Report:\n", classification_rep)
+
+        # Convert the report to a DataFrame for easier plotting
+        report = classification_report(all_labels, (np.array(all_predictions) > 0.5).astype(int), output_dict=True)
+        report_df = pd.DataFrame(report).transpose()
+        
+        # Plot the classification report
+        fig, ax = plt.subplots(figsize=(10, len(report_df) / 2))
+        ax.axis('off')
+        table = ax.table(cellText=report_df.values, colLabels=report_df.columns, rowLabels=report_df.index, cellLoc='center', loc='center')
+        
+        # Enhance the table with some styles
+        table.auto_set_font_size(False)
+        table.set_fontsize(12)
+        table.scale(1.2, 1.2)
+        
+        # Save the plot as an image
+        fig.savefig(os.path.join(self.config.root_dir, "classification_rep.png"), bbox_inches='tight', dpi=300)
+        plt.close(fig)
+
+
 
     def _plot_confusion_matrix(self, all_labels, all_predictions):
         cm = confusion_matrix(all_labels, (np.array(all_predictions) > 0.5).astype(int))
@@ -184,7 +208,7 @@ class ModelEvaluation:
         plt.ylabel('Actual')
         plt.title('Confusion Matrix')
         plt.savefig(os.path.join(self.config.root_dir, "confusion_matrix.png"))
-        plt.show()
+        plt.close()  # Close the figure to avoid display in some environments
 
     def _plot_roc_curve(self, all_labels, all_predictions):
         roc_auc = roc_auc_score(all_labels, all_predictions)
@@ -197,7 +221,7 @@ class ModelEvaluation:
         plt.title('ROC Curve')
         plt.legend()
         plt.savefig(os.path.join(self.config.root_dir, "roc_auc.png"))
-        plt.show()
+        plt.close()  # Close the figure to avoid display in some environments
 
     def _plot_pr_curve(self, all_labels, all_predictions):
         precision, recall, _ = precision_recall_curve(all_labels, all_predictions)
@@ -209,8 +233,41 @@ class ModelEvaluation:
         plt.title('Precision-Recall Curve')
         plt.legend()
         plt.savefig(os.path.join(self.config.root_dir, "pr_auc.png"))
-        plt.show()
-    
+        plt.close()  # Close the figure to avoid display in some environments
+
+    def _log_to_mlflow(self, all_labels, all_predictions, model):
+        precision, recall, _ = precision_recall_curve(all_labels, all_predictions)
+        sorted_indices = np.argsort(recall)
+        recall_sorted = np.array(recall)[sorted_indices]
+        precision_sorted = np.array(precision)[sorted_indices]
+        roc_pr_metrics = {
+            "roc_auc": roc_auc_score(all_labels, all_predictions),
+            "pr_auc": auc(recall_sorted, precision_sorted)
+        }
+        
+        mlflow.log_params({
+            "batch_size": self.config.batch_size,
+            "learning_rate": self.config.learning_rate,
+            "epochs": self.config.epochs,
+            "dropout_rates": self.config.dropout_rates,
+            "optimizer": self.config.optimizer,
+            "loss_function": self.config.loss_function,
+            "activation_function": self.config.activation_function
+        })
+        
+        mlflow.log_metrics(roc_pr_metrics)
+        
+        mlflow.pytorch.log_model(model, "model")
+        
+        mlflow.log_artifact(self.config.metric_file_name)
+        mlflow.log_artifact(self.config.report_path)
+        mlflow.log_artifact(self.config.confusion_matrix_report)
+        mlflow.log_artifact(os.path.join(self.config.root_dir, "confusion_matrix.png"))
+        mlflow.log_artifact(os.path.join(self.config.root_dir, "roc_auc.png"))
+        mlflow.log_artifact(os.path.join(self.config.root_dir, "pr_auc.png"))
+        mlflow.log_artifact(os.path.join(self.config.root_dir, "classification_rep.txt")) 
+        mlflow.log_artifact(os.path.join(self.config.root_dir, "classification_rep.png"))
+
 
 
 if __name__ == "__main__":
@@ -218,6 +275,7 @@ if __name__ == "__main__":
         config_manager = ConfigurationManager()
         model_eval_config = config_manager.get_model_evaluation_config()
         model_evaluator = ModelEvaluation(model_eval_config)
-        model_evaluator.evaluate()
+        with mlflow.start_run():
+            model_evaluator.evaluate()
     except CustomException as e:
         logger.error(f"Model trainer process failed: {e}")
