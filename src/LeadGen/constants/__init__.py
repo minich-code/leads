@@ -4,9 +4,9 @@ import sys
 
 CONFIG_FILE_PATH = Path("config\config.yaml")
 PARAMS_CONFIG_FILEPATH = Path("params.yaml")
-SCHEMA_FILE_PATH = Path("schema.yaml")
+SCHEMA_CONFIG_FILEPATH = Path("schema.yaml")
 DATA_INGESTION_CONFIG_FILEPATH = Path("config\data-ingestion.yaml")
-DATA_VALIDATION_FILEPATH = Path("config\data-validation.yaml")
+DATA_VALIDATION_CONFIG_FILEPATH = Path("config\data-validation.yaml")
 DATA_TRANSFORMATION_FILEPATH = Path("config\data-transformation.yaml")
 MODEL_TRAINER_CONFIG_FILEPATH = Path("config\model-trainer.yaml")
 MODEL_EVALUATION_CONFIG_FILEPATH = Path("config\model-evaluation.yaml")

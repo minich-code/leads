@@ -1,7 +1,7 @@
 dnn_params:
   batch_size: 32
   learning_rate: 0.001
-  epochs: 70
+  epochs: 20
   dropout_rates:
     layer_1: 0.1
     layer_2: 0.0

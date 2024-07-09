@@ -2,20 +2,40 @@ from pathlib import Path
 from src.LeadGen.utils.commons import read_yaml, create_directories
 from src.LeadGen.constants import *
 
-from src.LeadGen.entity.config_entity import (DataIngestionConfig, DataValidationConfig)
+from src.LeadGen.entity.config_entity import (DataIngestionConfig, DataValidationConfig, 
+                                              DataTransformationConfig, ModelTrainerConfig)
 from src.LeadGen.logger import logger      
 
 class ConfigurationManager:
-    def __init__(self, config_filepath=DATA_INGESTION_CONFIG_FILEPATH): 
+    def __init__(
+        self, 
+        config_filepath=DATA_INGESTION_CONFIG_FILEPATH,
+        data_validation_config=DATA_VALIDATION_CONFIG_FILEPATH,
+        data_preprocessing_config=DATA_TRANSFORMATION_FILEPATH, 
+        schema_config=SCHEMA_CONFIG_FILEPATH,
+        model_training_config=MODEL_TRAINER_CONFIG_FILEPATH,
+        params_config=PARAMS_CONFIG_FILEPATH
+        
+        ): 
+
 
         self.config = read_yaml(config_filepath)
-
+        self.data_val_config = read_yaml(data_validation_config)
+        self.preprocessing_config = read_yaml(data_preprocessing_config)
+        self.schema = read_yaml(schema_config)
+        self.training_config = read_yaml(model_training_config)
+        self.params = read_yaml(params_config)
+        
+        
         create_directories([self.config.artifacts_root])
+        create_directories([self.data_val_config.artifacts_root])
+        create_directories([self.preprocessing_config.artifacts_root])
+        create_directories([self.training_config.artifacts_root])
+
 
     def get_data_ingestion_config(self) -> DataIngestionConfig:
 
         config = self.config.data_ingestion
-
         create_directories([config.root_dir])
         
         return DataIngestionConfig(
@@ -25,18 +45,54 @@ class ConfigurationManager:
             collection_name=config.collection_name,
             batch_size=config.get('batch_size', 3000)
         )
+# Data validation Config 
+    def get_data_validation_config(self) -> DataValidationConfig:
+        data_val_config = self.data_val_config.data_validation
+        schema = self.schema.COLUMNS
+        create_directories([data_val_config.root_dir])
+        logger.debug("Data validation configuration loaded")
+        return DataValidationConfig(
+            root_dir=data_val_config.root_dir,
+            STATUS_FILE=data_val_config.STATUS_FILE,
+            data_dir=data_val_config.data_dir,
+            all_schema=schema,
+            critical_columns=data_val_config.critical_columns,
+            data_ranges=data_val_config.data_ranges
+        )
+ 
+ # Data transformation Config   
+    def get_data_transformation_config(self) -> DataTransformationConfig:
+        preprocessing_config = self.preprocessing_config.data_transformation
+        create_directories([preprocessing_config.root_dir])
+        return DataTransformationConfig(
+            root_dir=Path(preprocessing_config.root_dir),
+            data_path=Path(preprocessing_config.data_path),
+            numerical_cols=preprocessing_config.numerical_cols,
+            categorical_cols=preprocessing_config.categorical_cols
+        )
+    
 
-# # Data validation Config 
-#     def get_data_validation_config(self) -> DataValidationConfig:
-#         config = self.config.data_validation
-#         schema = self.schema.COLUMNS
-#         create_directories([config.root_dir])
-#         logger.debug("Data validation configuration loaded")
-#         return DataValidationConfig(
-#             root_dir=config.root_dir,
-#             STATUS_FILE=config.STATUS_FILE,
-#             data_dir=config.data_dir,
-#             all_schema=schema,
-#             critical_columns=config.critical_columns,
-#             data_ranges=config.data_ranges
-#         )
+# Model trainer 
+    def get_model_trainer_config(self) -> ModelTrainerConfig:
+        trainer_config = self.training_config.model_trainer
+        params = self.params.dnn_params
+
+        create_directories([trainer_config.root_dir])
+
+        return ModelTrainerConfig(
+            root_dir=Path(trainer_config.root_dir),
+            model_name=trainer_config.model_name,
+            train_features_path=trainer_config.train_features_path,
+            train_targets_path=trainer_config.train_targets_path,
+            val_features_path=trainer_config.val_features_path,
+            val_targets_path=trainer_config.val_targets_path,
+            val_metrics_path=Path(trainer_config.val_metrics_path),
+            batch_size=params['batch_size'],
+            learning_rate=params['learning_rate'],
+            epochs=params['epochs'],
+            dropout_rates=params['dropout_rates'],
+            optimizer=params['optimizer'],
+            loss_function=params['loss_function'],
+            activation_function=params['activation_function'],
+        )
+    

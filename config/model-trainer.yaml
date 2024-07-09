@@ -8,4 +8,5 @@ model_trainer:
   val_targets_path: artifacts/data_transformation/y_val_tensor.pt
   val_metrics_path: artifacts/model_trainer/model-val-metric.json
   model_name: model
+  mlflow_uri: https://dagshub.com/minich-code/churn.mlflow
 

@@ -18,19 +18,40 @@ stages:
     outs: 
       - artifacts\data_validation\status.json
 
-  data_transformation: 
-    cmd: python src\LeadGen\components\c_03_data_transformation.py
-    deps: 
-      - src\LeadGen\components\c_03_data_transformation.py
-      - config\data-transformation.yaml
 
-    outs: 
-      - artifacts\data_transformation\preprocessor_obj.joblib
-      - artifacts\data_transformation\X_test_tensor.pt
-      - artifacts\data_transformation\X_train_tensor.pt
-      - artifacts\data_transformation\X_val_tensor.pt
-      - artifacts\data_transformation\y_test_tensor.pt
-      - artifacts\data_transformation\y_train_tensor.pt
-      - artifacts\data_transformation\y_val_tensor.pt
+  model_training:
+    cmd: python src\LeadGen\pipelines\pip_04_model_trainer.py
+    deps:
+      - src\LeadGen\pipelines\pip_04_model_trainer.py
+      - config\model-trainer.yaml
+      - params.yaml
+      
+    outs:
+      - artifacts\model_trainer\model_epoch_1.pt 
+      - artifacts\model_trainer\model_epoch_2.pt
+      - artifacts\model_trainer\model_epoch_3.pt
+      - artifacts\model_trainer\model_epoch_4.pt
+      - artifacts\model_trainer\model_epoch_5.pt
+      - artifacts\model_trainer\model_epoch_6.pt
+      - artifacts\model_trainer\model_epoch_7.pt
+      - artifacts\model_trainer\model_epoch_8.pt
+      - artifacts\model_trainer\model_epoch_9.pt
+      - artifacts\model_trainer\model_epoch_10.pt
+      - artifacts\model_trainer\model_epoch_11.pt
+      - artifacts\model_trainer\model_epoch_12.pt
+      - artifacts\model_trainer\model_epoch_13.pt
+      - artifacts\model_trainer\model_epoch_14.pt
+      - artifacts\model_trainer\model_epoch_15.pt
+      - artifacts\model_trainer\model_epoch_16.pt
+      - artifacts\model_trainer\model_epoch_17.pt
+      - artifacts\model_trainer\model_epoch_18.pt
+      - artifacts\model_trainer\model_epoch_19.pt
+      - artifacts\model_trainer\model_epoch_20.pt
+      - artifacts\model_trainer\model-val-metric.json
+      - artifacts\model_trainer\training_validation_metrics.png
 
 
+
+
+
+  
