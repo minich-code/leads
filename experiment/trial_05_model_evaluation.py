@@ -35,6 +35,8 @@ from src.LeadGen.exception import CustomException
 import mlflow
 import mlflow.pytorch
 
+from dvclive import Live
+
 # Enable debug logging for MLflow
 logging.getLogger("mlflow").setLevel(logging.DEBUG)
 
@@ -120,6 +122,7 @@ class SimpleNN(nn.Module):
 class ModelEvaluation:
     def __init__(self, config: ModelEvaluationConfig):
         self.config = config
+        self.live = Live(save_dvc_exp=True)
 
     def load_data(self):
         X_val_tensor = torch.load(self.config.val_features_path)
@@ -165,6 +168,10 @@ class ModelEvaluation:
         }
         save_json(str(self.config.metric_file_name), roc_pr_metrics)
 
+        # Log metrics to DVCLive
+        self.live.log_metric("roc_auc", roc_pr_metrics["roc_auc"])
+        self.live.log_metric("pr_auc", roc_pr_metrics["pr_auc"])
+
     def _plot_metrics(self, all_labels, all_predictions):
         self._plot_classification_report(all_labels, all_predictions)
         self._plot_confusion_matrix(all_labels, all_predictions)
@@ -181,20 +188,29 @@ class ModelEvaluation:
         # Convert the report to a DataFrame for easier plotting
         report = classification_report(all_labels, (np.array(all_predictions) > 0.5).astype(int), output_dict=True)
         report_df = pd.DataFrame(report).transpose()
-        
-        # Plot the classification report
-        fig, ax = plt.subplots(figsize=(10, len(report_df) / 2))
-        ax.axis('off')
-        table = ax.table(cellText=report_df.values, colLabels=report_df.columns, rowLabels=report_df.index, cellLoc='center', loc='center')
-        
-        # Enhance the table with some styles
-        table.auto_set_font_size(False)
-        table.set_fontsize(12)
-        table.scale(1.2, 1.2)
-        
+
+        # Plot the classification report as a heatmap
+        plt.figure(figsize=(10, len(report_df) / 2))  # Adjust figure size as needed
+        sns.heatmap(report_df.iloc[:-2, :].T,  # Exclude 'accuracy' and 'weighted avg'
+                    annot=True, 
+                    cmap='viridis', 
+                    cbar=False,  # No colorbar needed for this plot
+                    fmt=".2f",  # Format annotations to two decimal places
+                    linewidths=0.5,  # Add thin lines between cells
+                    linecolor='lightgrey')  # Color of the lines
+
+        # Enhance the heatmap
+        plt.xlabel("Metrics")
+        plt.ylabel("Classes")
+        plt.title("Classification Report")
+        plt.tight_layout()
+
         # Save the plot as an image
-        fig.savefig(os.path.join(self.config.root_dir, "classification_rep.png"), bbox_inches='tight', dpi=300)
-        plt.close(fig)
+        plt.savefig(os.path.join(self.config.root_dir, "classification_rep.png"), bbox_inches='tight', dpi=300)
+        plt.close()
+
+        # Log plot to DVCLive
+        self.live.log_image("classification_rep", os.path.join(self.config.root_dir, "classification_rep.png"))
 
 
 
@@ -210,6 +226,9 @@ class ModelEvaluation:
         plt.savefig(os.path.join(self.config.root_dir, "confusion_matrix.png"))
         plt.close()  # Close the figure to avoid display in some environments
 
+        # Log plot to DVCLive
+        self.live.log_image("confusion_matrix", os.path.join(self.config.root_dir, "confusion_matrix.png"))
+
     def _plot_roc_curve(self, all_labels, all_predictions):
         roc_auc = roc_auc_score(all_labels, all_predictions)
         fpr, tpr, _ = roc_curve(all_labels, all_predictions)
@@ -223,6 +242,9 @@ class ModelEvaluation:
         plt.savefig(os.path.join(self.config.root_dir, "roc_auc.png"))
         plt.close()  # Close the figure to avoid display in some environments
 
+        # Log plot to DVCLive
+        self.live.log_image("roc_auc", os.path.join(self.config.root_dir, "roc_auc.png"))
+
     def _plot_pr_curve(self, all_labels, all_predictions):
         precision, recall, _ = precision_recall_curve(all_labels, all_predictions)
         pr_auc = auc(recall, precision)
@@ -234,6 +256,9 @@ class ModelEvaluation:
         plt.legend()
         plt.savefig(os.path.join(self.config.root_dir, "pr_auc.png"))
         plt.close()  # Close the figure to avoid display in some environments
+
+        # Log plot to DVCLive
+        self.live.log_image("pr_auc", os.path.join(self.config.root_dir, "pr_auc.png"))
 
     def _log_to_mlflow(self, all_labels, all_predictions, model):
         precision, recall, _ = precision_recall_curve(all_labels, all_predictions)
@@ -267,6 +292,12 @@ class ModelEvaluation:
         mlflow.log_artifact(os.path.join(self.config.root_dir, "pr_auc.png"))
         mlflow.log_artifact(os.path.join(self.config.root_dir, "classification_rep.txt")) 
         mlflow.log_artifact(os.path.join(self.config.root_dir, "classification_rep.png"))
+
+        # # Log the plots with dvclive
+        # dvclive.log_image("classification_rep.png", os.path.join(self.config.root_dir, "classification_rep.png"))
+        # dvclive.log_image("confusion_matrix.png", os.path.join(self.config.root_dir, "confusion_matrix.png"))
+        # dvclive.log_image("roc_auc.png", os.path.join(self.config.root_dir, "roc_auc.png"))
+        # dvclive.log_image("pr_auc.png", os.path.join(self.config.root_dir, "pr_auc.png"))
 
 
 

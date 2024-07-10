@@ -1,54 +1,54 @@
-stages: 
+stages:
   data_ingestion:
     cmd: python src\LeadGen\pipelines\pip_01_data_ingestion.py
-    deps: 
-      - src\LeadGen\pipelines\pip_01_data_ingestion.py
-      - config\data-ingestion.yaml
+    deps:
+    - src\LeadGen\pipelines\pip_01_data_ingestion.py
+    - config\data-ingestion.yaml
 
-    outs: 
-      - artifacts\data_ingestion\lead.csv
-      - artifacts\data_ingestion\data-ingestion-metadata.json
+    outs:
+    - artifacts\data_ingestion\lead.csv
+    - artifacts\data_ingestion\data-ingestion-metadata.json
 
-  data_validation: 
+  data_validation:
     cmd: python src\LeadGen\pipelines\pip_02_data_validation.py
-    deps: 
-      - src\LeadGen\pipelines\pip_02_data_validation.py
-      - config\data-validation.yaml
+    deps:
+    - src\LeadGen\pipelines\pip_02_data_validation.py
+    - config\data-validation.yaml
 
-    outs: 
-      - artifacts\data_validation\status.json
+    outs:
+    - artifacts\data_validation\status.json
 
 
   model_training:
     cmd: python src\LeadGen\pipelines\pip_04_model_trainer.py
     deps:
-      - src\LeadGen\pipelines\pip_04_model_trainer.py
-      - config\model-trainer.yaml
-      - params.yaml
-      
+    - src\LeadGen\pipelines\pip_04_model_trainer.py
+    - config\model-trainer.yaml
+    - params.yaml
+
     outs:
-      - artifacts\model_trainer\model_epoch_1.pt 
-      - artifacts\model_trainer\model_epoch_2.pt
-      - artifacts\model_trainer\model_epoch_3.pt
-      - artifacts\model_trainer\model_epoch_4.pt
-      - artifacts\model_trainer\model_epoch_5.pt
-      - artifacts\model_trainer\model_epoch_6.pt
-      - artifacts\model_trainer\model_epoch_7.pt
-      - artifacts\model_trainer\model_epoch_8.pt
-      - artifacts\model_trainer\model_epoch_9.pt
-      - artifacts\model_trainer\model_epoch_10.pt
-      - artifacts\model_trainer\model_epoch_11.pt
-      - artifacts\model_trainer\model_epoch_12.pt
-      - artifacts\model_trainer\model_epoch_13.pt
-      - artifacts\model_trainer\model_epoch_14.pt
-      - artifacts\model_trainer\model_epoch_15.pt
-      - artifacts\model_trainer\model_epoch_16.pt
-      - artifacts\model_trainer\model_epoch_17.pt
-      - artifacts\model_trainer\model_epoch_18.pt
-      - artifacts\model_trainer\model_epoch_19.pt
-      - artifacts\model_trainer\model_epoch_20.pt
-      - artifacts\model_trainer\model-val-metric.json
-      - artifacts\model_trainer\training_validation_metrics.png
+    - artifacts\model_trainer\model_epoch_1.pt
+    - artifacts\model_trainer\model_epoch_2.pt
+    - artifacts\model_trainer\model_epoch_3.pt
+    - artifacts\model_trainer\model_epoch_4.pt
+    - artifacts\model_trainer\model_epoch_5.pt
+    - artifacts\model_trainer\model_epoch_6.pt
+    - artifacts\model_trainer\model_epoch_7.pt
+    - artifacts\model_trainer\model_epoch_8.pt
+    - artifacts\model_trainer\model_epoch_9.pt
+    - artifacts\model_trainer\model_epoch_10.pt
+    - artifacts\model_trainer\model_epoch_11.pt
+    - artifacts\model_trainer\model_epoch_12.pt
+    - artifacts\model_trainer\model_epoch_13.pt
+    - artifacts\model_trainer\model_epoch_14.pt
+    - artifacts\model_trainer\model_epoch_15.pt
+    - artifacts\model_trainer\model_epoch_16.pt
+    - artifacts\model_trainer\model_epoch_17.pt
+    - artifacts\model_trainer\model_epoch_18.pt
+    - artifacts\model_trainer\model_epoch_19.pt
+    - artifacts\model_trainer\model_epoch_20.pt
+    - artifacts\model_trainer\model-val-metric.json
+    - artifacts\model_trainer\training_validation_metrics.png
 
   model_evaluation:
     cmd: python src\LeadGen\pipelines\pip_05_model_evaluation.py
@@ -57,8 +57,7 @@ stages:
       - config\model-evaluation.yaml
       - params.yaml
 
-    
-    outs:
+    outs: 
       - artifacts\model_evaluation\classification_rep.png
       - artifacts\model_evaluation\classification_rep.txt
       - artifacts\model_evaluation\confusion_matrix_rep.txt
@@ -67,8 +66,13 @@ stages:
       - artifacts\model_evaluation\pr_auc.png
       - artifacts\model_evaluation\roc_auc.png
 
+    # plots:
+    #   - artifacts\model_evaluation\classification_rep.png
+    #   #- artifacts\model_evaluation\classification_rep.txt
+    #   #- artifacts\model_evaluation\confusion_matrix_rep.txt
+    #   - artifacts\model_evaluation\confusion_matrix.png
+    #   #- artifacts\model_evaluation\metrics.json
+    #   - artifacts\model_evaluation\pr_auc.png
+    #   - artifacts\model_evaluation\roc_auc.png
 
 
-
-
-  
