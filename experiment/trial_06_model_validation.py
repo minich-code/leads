@@ -53,7 +53,7 @@ class ModelValidationConfig:
     #roc_auc_path: Path
     #pr_auc_path: Path
 
-    # Model parameters
+    #Model parameters
     batch_size: int
     learning_rate: float
     epochs: int

@@ -3,7 +3,8 @@ from src.LeadGen.utils.commons import read_yaml, create_directories
 from src.LeadGen.constants import *
 
 from src.LeadGen.entity.config_entity import (DataIngestionConfig, DataValidationConfig, 
-                                              DataTransformationConfig, ModelTrainerConfig, ModelEvaluationConfig)
+                                              DataTransformationConfig, ModelTrainerConfig, ModelEvaluationConfig,
+                                               ModelValidationConfig)
 from src.LeadGen.logger import logger      
 
 class ConfigurationManager:
@@ -15,7 +16,8 @@ class ConfigurationManager:
         schema_config=SCHEMA_CONFIG_FILEPATH,
         model_training_config=MODEL_TRAINER_CONFIG_FILEPATH,
         params_config=PARAMS_CONFIG_FILEPATH,
-        model_evaluation_config=MODEL_EVALUATION_CONFIG_FILEPATH
+        model_evaluation_config=MODEL_EVALUATION_CONFIG_FILEPATH,
+        model_validation_config=MODEL_VALIDATION_CONFIG_FILEPATH
         
         ): 
 
@@ -27,6 +29,7 @@ class ConfigurationManager:
         self.training_config = read_yaml(model_training_config)
         self.params = read_yaml(params_config)
         self.evaluation_config = read_yaml(model_evaluation_config)
+        self.validation_config = read_yaml(model_validation_config)
         
         
         create_directories([self.config.artifacts_root])
@@ -34,6 +37,10 @@ class ConfigurationManager:
         create_directories([self.preprocessing_config.artifacts_root])
         create_directories([self.training_config.artifacts_root])
         create_directories([self.evaluation_config.artifacts_root])
+        create_directories([self.validation_config.artifacts_root])
+
+
+    
 
 
     def get_data_ingestion_config(self) -> DataIngestionConfig:
@@ -123,4 +130,29 @@ class ConfigurationManager:
             loss_function=params["loss_function"],
             activation_function=params["activation_function"]
         )
+    
+
+# Model validation
+    def get_model_validation_config(self) -> ModelValidationConfig:
+        val_config = self.validation_config.model_validation
+        params = self.params.dnn_params
+        create_directories([val_config.root_dir])
+        
+        return ModelValidationConfig(
+            root_dir=Path(val_config.root_dir),
+            test_feature_path=Path(val_config.test_feature_path),
+            test_target_path=Path(val_config.test_target_path),
+            model_path=Path(val_config.model_path.format(model_name=val_config.model_name, epochs=params["epochs"])),
+            class_report=Path(val_config.class_report),
+            val_metric_file_name=Path(val_config.val_metric_file_name),
+
+            batch_size=params["batch_size"],
+            learning_rate=params["learning_rate"],
+            epochs=params["epochs"],
+            dropout_rates=params["dropout_rates"],
+            optimizer=params["optimizer"],
+            loss_function=params["loss_function"],
+            activation_function=params["activation_function"]
+        )
+
     

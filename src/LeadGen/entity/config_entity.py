@@ -70,3 +70,28 @@ class ModelEvaluationConfig:
     loss_function: str
     activation_function: str
 
+
+@dataclass
+class ModelValidationConfig:
+    root_dir: Path
+    test_feature_path: Path
+    test_target_path: Path
+    model_path: Path
+    class_report: Path
+    #classification_report_path: Path
+    val_metric_file_name: Path
+    #conf_matrix: Path
+    #roc_auc_path: Path
+    #pr_auc_path: Path
+
+    # Model parameters
+    batch_size: int
+    learning_rate: float
+    epochs: int
+    dropout_rates: dict
+    optimizer: str
+    loss_function: str
+    activation_function: str
+
+
+

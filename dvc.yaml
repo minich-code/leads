@@ -66,13 +66,21 @@ stages:
       - artifacts\model_evaluation\pr_auc.png
       - artifacts\model_evaluation\roc_auc.png
 
-    # plots:
-    #   - artifacts\model_evaluation\classification_rep.png
-    #   #- artifacts\model_evaluation\classification_rep.txt
-    #   #- artifacts\model_evaluation\confusion_matrix_rep.txt
-    #   - artifacts\model_evaluation\confusion_matrix.png
-    #   #- artifacts\model_evaluation\metrics.json
-    #   - artifacts\model_evaluation\pr_auc.png
-    #   - artifacts\model_evaluation\roc_auc.png
+
+  model_validation:
+    cmd: python src\LeadGen\pipelines\pip_06_model_validation.py
+    deps: 
+      - src\LeadGen\pipelines\pip_06_model_validation.py
+      - config\model-validation.yaml
+      - params.yaml
+
+    outs:
+      - artifacts\model_validation\classification_report.json
+      - artifacts\model_validation\classification-report.png
+      - artifacts\model_validation\confusion_matrix.json
+      - artifacts\model_validation\metrics.json
+      - artifacts\model_validation\pr_auc.png
+      - artifacts\model_validation\roc_auc.png
+      - artifacts\model_validation\val_confusion_matrix.png
 
 
